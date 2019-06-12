@@ -1,4 +1,8 @@
 ﻿using System;
+using gestioncomprasAPI.Models.Model.StoredProcedures;
+using gestioncomprasAPI.Models.Model.StoredProcedures.EmpresaProveedora;
+using gestioncomprasAPI.Models.Model.StoredProcedures.InstitucionGubernamental;
+using gestioncomprasAPI.Models.Model.StoredProcedures.Usuarios;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -35,13 +39,41 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<RolPermiso> RolPermiso { get; set; }
         public virtual DbSet<Usuario> Usuario { get; set; }
         public virtual DbSet<UsuarioRol> UsuarioRol { get; set; }
+        public virtual DbSet<SPSLTBContactoPersonaIdResult> SPSLTBContactoPersonaId { get; set; }
+        public virtual DbSet<SPINTBPersonaResult> SPINTBPersona { get; set; }
+        public virtual DbSet<SPUPTBPersonaResult> SPUPTBPersona { get; set; }
+
+        // Usuarios
+        public virtual DbSet<SPSLTBUsuarioResult> SPSLTBUsuario { get; set; }
+        public virtual DbSet<SPSLTBPermisoxRolResult> SPSLTBPermisoxRol { get; set; }
+        public virtual DbSet<SPSLTBRolxUsuarioResult> SPSLTBRolxUsuario { get; set; }
+        public virtual DbSet<SPINTBUsuarioResult> SPINTBUsuario { get; set; }
+        public virtual DbSet<SPUPTBUsuarioInactivarResult> SPUPTBUsuarioInactivar { get; set; }
+        public virtual DbSet<SPUPTBUsuarioActivarResult> SPUPTBUsuarioActivar { get; set; }
+
+
+        // Empresa Proveedora
+        public virtual DbSet<SPSLTBEmpresaProveedoraResult> SPSLTBEmpresaProveedora { get; set; }
+        public virtual DbSet<SPSLTBEmpresaProveedoraIdResult> SPSLTBEmpresaProveedoraId { get; set; }
+        public virtual DbSet<SPINTBEmpresaProveedoraResult> SPINTBEmpresaProveedora { get; set; }
+        public virtual DbSet<SPSLTBContactoEmpresaIdResult> SPSLTBContactoEmpresaId { get; set; }
+        public virtual DbSet<SPUPTBEmpresaProveedoraResult> SPUPTBEmpresaProveedora { get; set; }
+        public virtual DbSet<SPUPTBAutorizacionEmpresaResult> SPUPTBAutorizacionEmpresa { get; set; }
+
+        // Institución Gubernamental
+        public virtual DbSet<SPSLTBInstitucionGubernamentalResult> SPSLTBInstitucionGubernamental { get; set; }
+        public virtual DbSet<SPSLTBInstitucionGubernamentalIdResult> SPSLTBInstitucionGubernamentalId { get; set; }
+        public virtual DbSet<SPINTBInstitucionGubernamentalResult> SPINTBInstitucionGubernamental { get; set; }
+        public virtual DbSet<SPUPTBInstitucionGubernamentalResult> SPUPTBInstitucionGubernamental { get; set; }
+        public virtual DbSet<SPSLTBContactoInstitucionIdResult> SPSLTBContactoInstitucionId { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=pintor.eastus.cloudapp.azure.com;Initial Catalog=GestionCompras;User ID=adminbad;Password=Bad1152019**");
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("GestionComprasDatabase");                
             }
         }
 
