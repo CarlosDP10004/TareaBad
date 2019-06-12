@@ -125,23 +125,24 @@ namespace gestioncomprasAPI.Controllers
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
-        public IActionResult DeleteUsuario([FromRoute] int id, int caso)
+        public IActionResult DeleteUsuario([FromRoute] int id)
         {
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_id", id)
             };
+            var result = _context.SPUPTBUsuarioInactivar.FromSql("EXEC dbo.SPUPTBUsuarioInactivar @_id", parameters).FirstOrDefault();
+            try
+            {
+                if (result == null)
+                    return BadRequest("El registro no fue actualizado");
+                _context.SaveChanges();
+                return Ok($"Registro actualizado con éxito {result.Id}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
             
-            switch (caso) {
-                case 1:
-                    _context.SPUPTBUsuarioInactivar.FromSql("EXEC dbo.SPUPTBUsuarioInactivar @_id", parameters).FirstOrDefault();
-                break;
-                default:
-                    _context.SPUPTBUsuarioActivar.FromSql("EXEC dbo.SPUPTBUsuarioActivar @_id", parameters).FirstOrDefault();
-                break;
-
-            }         
-
-            return Ok();
         }
 
         private bool UsuarioExists(int id)

@@ -49,7 +49,7 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPSLTBRolxUsuarioResult> SPSLTBRolxUsuario { get; set; }
         public virtual DbSet<SPINTBUsuarioResult> SPINTBUsuario { get; set; }
         public virtual DbSet<SPUPTBUsuarioInactivarResult> SPUPTBUsuarioInactivar { get; set; }
-        public virtual DbSet<SPUPTBUsuarioActivarResult> SPUPTBUsuarioActivar { get; set; }
+        public virtual DbSet<SPSLTBUsuarioAutenticarResult> SPSLTBUsuarioAutenticar { get; set; }
 
 
         // Empresa Proveedora

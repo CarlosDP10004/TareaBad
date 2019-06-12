@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace gestioncomprasAPI.Models.Model.StoredProcedures.Usuarios
 {
-    public class SPUPTBUsuarioActivarResult
+    public class SPSLTBUsuarioAutenticarResult
     {
         public int Id { get; set; }
     }

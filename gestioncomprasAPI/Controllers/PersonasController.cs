@@ -82,7 +82,7 @@ namespace gestioncomprasAPI.Controllers
             try
             {
                 if(resultado == null)
-                    return BadRequest("No sirve");
+                    return BadRequest("El registro no fue actualizado");
                 _context.SaveChanges();
                 return Ok($"Registro actualizado con éxito {resultado.Id}");
             }
