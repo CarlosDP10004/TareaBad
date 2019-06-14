@@ -37,10 +37,6 @@ namespace gestioncomprasAPI.Controllers
         [HttpGet("{id}")]
         public IActionResult GetUsuario([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_id", id)
             };
@@ -68,23 +64,25 @@ namespace gestioncomprasAPI.Controllers
 
         // PUT: api/Usuarios/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario([FromRoute] int id, [FromBody] Usuario usuario)
+        public IActionResult PutUsuario([FromRoute] int id, [FromBody] UsuarioDetalleBasic usuario)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_id", id),
+                new SqlParameter("@_correoElectronico", usuario.CorreoElectronico),
+                new SqlParameter("@_clave", usuario.Clave),
+                new SqlParameter("@_idPersona", usuario.IdPersona),
+                new SqlParameter("@_session", usuario.UsuarioSession)
+            };
 
-            if (id != usuario.Idusuario)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(usuario).State = EntityState.Modified;
+            var query = _context.SPUPTBUsuario.FromSql("EXEC dbo.SPUPTBUsuario @_id, @_correoElectronico, @_clave, @_idPersona, @_session ", parameters).FirstOrDefault();
 
             try
             {
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
+                if (query.Id == 0)
+                    BadRequest("Ya existe un usuario con los mismos datos que desea actualizar");
+                else
+                    Ok("El usuario fue actualizado correctamente");
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -113,10 +111,11 @@ namespace gestioncomprasAPI.Controllers
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_correoElectronico", usuario.CorreoElectronico),
                 new SqlParameter("@_clave", usuario.Clave),
-                new SqlParameter("@_idPersona", usuario.IdPersona)
+                new SqlParameter("@_idPersona", usuario.IdPersona),
+                new SqlParameter("@_session", usuario.UsuarioSession)
             };
 
-            var resultado =_context.SPINTBUsuario.FromSql("EXEC dbo.SPINTBUsuario @_correoElectronico, @_clave, @_idPersona", parameters).FirstOrDefault();
+            var resultado =_context.SPINTBUsuario.FromSql("EXEC dbo.SPINTBUsuario @_correoElectronico, @_clave, @_idPersona, @_session", parameters).FirstOrDefault();
             if (resultado.Id == 0)
                 return BadRequest("El usuario ya existe en la Base de Datos");
             else
@@ -125,12 +124,13 @@ namespace gestioncomprasAPI.Controllers
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
-        public IActionResult DeleteUsuario([FromRoute] int id)
+        public IActionResult DeleteUsuario([FromRoute] int id, [FromBody] UsuarioDetalleBasic usuario)
         {
             SqlParameter[] parameters = new SqlParameter[] {
-                new SqlParameter("@_id", id)
+                new SqlParameter("@_id", id),
+                new SqlParameter("@_session", usuario.UsuarioSession)
             };
-            var result = _context.SPUPTBUsuarioInactivar.FromSql("EXEC dbo.SPUPTBUsuarioInactivar @_id", parameters).FirstOrDefault();
+            var result = _context.SPUPTBUsuarioInactivar.FromSql("EXEC dbo.SPUPTBUsuarioInactivar @_id, @_session", parameters).FirstOrDefault();
             try
             {
                 if (result == null)
@@ -138,12 +138,27 @@ namespace gestioncomprasAPI.Controllers
                 _context.SaveChanges();
                 return Ok($"Registro actualizado con éxito {result.Id}");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return BadRequest();
             }
             
         }
+
+        //GET: Permisos
+        [HttpPost]
+        [Route("AgregarRoles")]
+
+        public IActionResult PostRolesUsuario([FromRoute] int id, [FromBody] List<UsuarioRolDetalle> rol) {
+            foreach (var Ur in rol) {
+                var usuarioRol = new UsuarioRol();
+                
+                
+            }
+
+            return Ok();
+        }
+
 
         private bool UsuarioExists(int id)
         {

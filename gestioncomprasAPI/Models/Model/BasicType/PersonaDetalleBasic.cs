@@ -22,6 +22,7 @@ namespace gestioncomprasAPI.Models.Model.BasicType
         public string TelefonoFijo { get; set; }
         public string TelefonoMovil { get; set; }
         public string CorreoElectronico { get; set; }
+        public int UsuarioSession { get; set; }
 
     }
 }

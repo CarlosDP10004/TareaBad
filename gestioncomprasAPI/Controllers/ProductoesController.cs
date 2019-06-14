@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using gestioncomprasAPI.Models;
+using System.Data.SqlClient;
+using gestioncomprasAPI.Models.Model.BasicType;
 
 namespace gestioncomprasAPI.Controllers
 {
@@ -22,21 +24,24 @@ namespace gestioncomprasAPI.Controllers
 
         // GET: api/Productoes
         [HttpGet]
-        public IEnumerable<Producto> GetProducto()
+        public IActionResult GetProducto()
         {
-            return _context.Producto;
+            SqlParameter[] parameters = new SqlParameter[] {
+
+            };
+            var query = _context.Producto.FromSql("EXEC Dbo.SPSLTBProducto").ToList();
+            return Ok(query);
         }
 
         // GET: api/Productoes/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProducto([FromRoute] int id)
+        public IActionResult GetProducto([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_id", id)
+            };
 
-            var producto = await _context.Producto.FindAsync(id);
+            var producto = _context.Producto.FromSql("EXEC dbo.SPSLTBProductoId @_id", parameters).FirstOrDefault();
 
             if (producto == null)
             {
@@ -48,29 +53,36 @@ namespace gestioncomprasAPI.Controllers
 
         // PUT: api/Productoes/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProducto([FromRoute] int id, [FromBody] Producto producto)
+        public IActionResult PutProducto([FromRoute] int id, [FromBody] ProductoDetalleBasic producto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_id", id),
+                new SqlParameter("@_idEmpresaProveedora", producto.IdEmpresaProveedora),
+                new SqlParameter("@_nombreProducto", producto.NombreProducto),
+                new SqlParameter("@_marca", producto.Marca),
+                new SqlParameter("@_modelo", producto.Modelo),
+                new SqlParameter("@_anioFabrica", producto.AnioFabricacion),
+                new SqlParameter("@_capacidadBTU", producto.CapacidadBtu),
+                new SqlParameter("@_precioUnidad", producto.PrecioUnidad),
+                new SqlParameter("@_usuarioSession", producto.UsuarioSession)
+            };
 
-            if (id != producto.IdProducto)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(producto).State = EntityState.Modified;
-
+            var query = _context.SPUPTBProducto.FromSql("EXEC dbo.SPUPTBProducto @_id, @_idEmpresaProveedora, @_nombreProducto, @_marca, @_modelo, " +
+                "@_anioFabrica, @_capacidadBTU, @_precioUnidad, @_usuarioSession", parameters).FirstOrDefault();
             try
             {
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
+                if (query.Id == 0)
+                    BadRequest("Los datos que esta ingresando para el producto, ya estan siendo usados por otro producto");
+                else
+                    Ok("El producto fue actualizado correctamente.");
+
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!ProductoExists(id))
                 {
-                    return NotFound();
+                    return NotFound("El producto no fue encontrado.");
                 }
                 else
                 {
@@ -83,38 +95,34 @@ namespace gestioncomprasAPI.Controllers
 
         // POST: api/Productoes
         [HttpPost]
-        public async Task<IActionResult> PostProducto([FromBody] Producto producto)
+        public IActionResult PostProducto([FromBody] ProductoDetalleBasic producto)
         {
-            if (!ModelState.IsValid)
+            SqlParameter[] parameter = new SqlParameter[] {
+                new SqlParameter("@_idEmpresaProveedora", producto.IdEmpresaProveedora),
+                new SqlParameter("@_nombreProducto", producto.NombreProducto),
+                new SqlParameter("@_marca", producto.Marca),
+                new SqlParameter("@_modelo", producto.Modelo),
+                new SqlParameter("@_anioFabrica", producto.AnioFabricacion),
+                new SqlParameter("@_capacidadBTU", producto.CapacidadBtu), 
+                new SqlParameter("@_precioUnidad", producto.PrecioUnidad), 
+                new SqlParameter("@_usuarioSession", producto.UsuarioSession)
+            };
+
+            var query = _context.SPINTBProducto.FromSql("EXEC dbo.SPINTBProducto @_idEmpresaProveedora, @_nombreProducto, @_marca, @_modelo, " +
+                "@_anioFabrica, @_capacidadBTU, @_precioUnidad, @_usuarioSession", parameter).FirstOrDefault();
+            try
             {
-                return BadRequest(ModelState);
+                _context.SaveChanges();
+                if (query.Id == 1)
+                    return Ok("El registro fue almacenado correctamente");
+                else
+                    return BadRequest("Surgió un error en la transacción");
             }
-
-            _context.Producto.Add(producto);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProducto", new { id = producto.IdProducto }, producto);
-        }
-
-        // DELETE: api/Productoes/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProducto([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
+            catch (Exception)
             {
-                return BadRequest(ModelState);
-            }
 
-            var producto = await _context.Producto.FindAsync(id);
-            if (producto == null)
-            {
-                return NotFound();
-            }
-
-            _context.Producto.Remove(producto);
-            await _context.SaveChangesAsync();
-
-            return Ok(producto);
+                throw;
+            }            
         }
 
         private bool ProductoExists(int id)

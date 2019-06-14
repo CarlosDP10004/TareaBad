@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 
 namespace gestioncomprasAPI.Models.Model.BasicType
 {
-    public class UsuarioDetalleBasic
+    public class RolDetalleBasic
     {
-        public string CorreoElectronico { get; set; }
-        public string Clave { get; set; }
-        public int IdPersona { get; set; }
+        public string NombreRol { get; set; }
         public int UsuarioSession { get; set; }
     }
 }

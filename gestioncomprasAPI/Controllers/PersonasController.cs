@@ -74,11 +74,12 @@ namespace gestioncomprasAPI.Controllers
                    new SqlParameter("@_nit", persona.Nit),
                    new SqlParameter("@_isss", persona.Isss),
                    new SqlParameter("@_fotoPerfil", persona.FotoPerfil),
+                   new SqlParameter("@_session", persona.UsuarioSession),
                    new SqlParameter("@_telefonoFijo", persona.TelefonoFijo),
                    new SqlParameter("@_telefonoMovil", persona.TelefonoMovil),
-                   new SqlParameter("@_correoElectronico", persona.CorreoElectronico),
+                   new SqlParameter("@_correoElectronico", persona.CorreoElectronico)                   
                };
-            var resultado = _context.SPUPTBPersona.FromSql("EXEC dbo.SPUPTBPersona @_id, @_nombre, @_apellido, @_dui, @_nit, @_isss,@_fotoPerfil, @_telefonoFijo, @_telefonoMovil, @_correoElectronico", parameters).FirstOrDefault();
+            var resultado = _context.SPUPTBPersona.FromSql("EXEC dbo.SPUPTBPersona @_id, @_nombre, @_apellido, @_dui, @_nit, @_isss,@_fotoPerfil, @_session, @_telefonoFijo, @_telefonoMovil, @_correoElectronico", parameters).FirstOrDefault();
             try
             {
                 if(resultado == null)
@@ -86,7 +87,7 @@ namespace gestioncomprasAPI.Controllers
                 _context.SaveChanges();
                 return Ok($"Registro actualizado con éxito {resultado.Id}");
             }
-            catch (Exception ex) {
+            catch (Exception) {
                 return BadRequest();
             }
             
@@ -102,45 +103,44 @@ namespace gestioncomprasAPI.Controllers
             }
             SqlParameter[] parameters = new SqlParameter[]
                {
-                   //new SqlParameter("@returnVal", SqlDbType.Int)  {Direction = ParameterDirection.Output},
                    new SqlParameter("@_nombre", persona.NombrePersona),
                    new SqlParameter("@_apellido", persona.ApellidoPersona),
                    new SqlParameter("@_dui", persona.Dui),
                    new SqlParameter("@_nit", persona.Nit),
                    new SqlParameter("@_isss", persona.Isss),
                    new SqlParameter("@_fotoPerfil", persona.FotoPerfil),
+                   new SqlParameter("@_session", persona.UsuarioSession),
                    new SqlParameter("@_telefonoFijo", persona.TelefonoFijo),
                    new SqlParameter("@_telefonoMovil", persona.TelefonoMovil),
-                   new SqlParameter("@_correoElectronico", persona.CorreoElectronico)
+                   new SqlParameter("@_correoElectronico", persona.CorreoElectronico)                   
                };
 
-            _context.SPINTBPersona.FromSql("EXEC dbo.SPINTBPersona @_nombre, @_apellido, @_dui, " +
-                "@_nit, @_isss, @_fotoPerfil, @_telefonoFijo, @_telefonoMovil, @_correoElectronico", parameters);
-            var result = parameters[0].Value;
-
-            return Ok(result);
-        }
-
-        // DELETE: api/Personas/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePersona([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
+            var result = _context.SPINTBPersona.FromSql("EXEC dbo.SPINTBPersona @_nombre," +
+                " @_apellido," +
+                " @_dui, " +
+                "@_nit, " +
+                "@_isss, " +
+                "@_fotoPerfil, " +
+                "@_session, " +
+                "@_telefonoFijo, " +
+                "@_telefonoMovil, " +
+                "@_correoElectronico", parameters).FirstOrDefault();
+            
+            try
             {
-                return BadRequest(ModelState);
+                _context.SaveChanges();
+                if (result.Id == 0)
+                    BadRequest("La persona que desea agregar ya existe en la Base de Datos");
+                else
+                    return Content("La persona fue agregada exitosamente");
             }
-
-            var persona = await _context.Persona.FindAsync(id);
-            if (persona == null)
+            catch (Exception)
             {
-                return NotFound();
+
+                throw;
             }
-
-            _context.Persona.Remove(persona);
-            await _context.SaveChangesAsync();
-
-            return Ok(persona);
-        }
+            return NoContent();
+        }        
 
         private bool PersonaExists(int id)
         {

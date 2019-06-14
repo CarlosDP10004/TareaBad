@@ -1,7 +1,9 @@
 ﻿using System;
 using gestioncomprasAPI.Models.Model.StoredProcedures;
+using gestioncomprasAPI.Models.Model.StoredProcedures.Bitacora;
 using gestioncomprasAPI.Models.Model.StoredProcedures.EmpresaProveedora;
 using gestioncomprasAPI.Models.Model.StoredProcedures.InstitucionGubernamental;
+using gestioncomprasAPI.Models.Model.StoredProcedures.Producto;
 using gestioncomprasAPI.Models.Model.StoredProcedures.Usuarios;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -50,6 +52,9 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPINTBUsuarioResult> SPINTBUsuario { get; set; }
         public virtual DbSet<SPUPTBUsuarioInactivarResult> SPUPTBUsuarioInactivar { get; set; }
         public virtual DbSet<SPSLTBUsuarioAutenticarResult> SPSLTBUsuarioAutenticar { get; set; }
+        public virtual DbSet<SPSLTBBitacoraResult> SPSLTBBitacora { get; set; }
+        public virtual DbSet<SPUPTBUsuarioResult> SPUPTBUsuario { get; set; }
+        public virtual DbSet<SPUPTBRolResult> SPUPTBRol { get; set; }
 
 
         // Empresa Proveedora
@@ -66,6 +71,10 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPINTBInstitucionGubernamentalResult> SPINTBInstitucionGubernamental { get; set; }
         public virtual DbSet<SPUPTBInstitucionGubernamentalResult> SPUPTBInstitucionGubernamental { get; set; }
         public virtual DbSet<SPSLTBContactoInstitucionIdResult> SPSLTBContactoInstitucionId { get; set; }
+
+        // Producto
+        public virtual DbSet<SPINTBProductoResult> SPINTBProducto { get; set; }
+        public virtual DbSet<SPUPTBProductoResult> SPUPTBProducto { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -432,6 +441,12 @@ namespace gestioncomprasAPI.Models
 
                 entity.Property(e => e.Marca)
                     .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.NombreProducto)
+                    .IsRequired()
+                    .HasColumnName("NombreProducto")
                     .HasMaxLength(100)
                     .IsUnicode(false);
 

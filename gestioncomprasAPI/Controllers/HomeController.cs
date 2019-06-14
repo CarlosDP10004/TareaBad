@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using gestioncomprasAPI.Models;
 using gestioncomprasAPI.Models.Model.BasicType;
+using gestioncomprasAPI.Models.Model.ComplexType;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,6 @@ namespace gestioncomprasAPI.Controllers
     {
         private readonly GestionComprasContext _context;
 
-        private UsuariosController session;
-
         public HomeController(GestionComprasContext context)
         {
             _context = context;
@@ -26,7 +25,7 @@ namespace gestioncomprasAPI.Controllers
 
         //POST: api/Home/5
         [HttpPost]
-        public IActionResult LogueoUsuario([FromBody] UsuarioLoginBasic usuario)
+        public IActionResult LogueoUsuario([FromBody] UsuarioDetalle usuario)
         {
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_correoElectronico", usuario.CorreoElectronico),
@@ -45,21 +44,45 @@ namespace gestioncomprasAPI.Controllers
                 case 3:
                     return NotFound("Su usuario ha sido bloqueado, comuniquese con HelpDesk");
                 default:
-                    return Ok("Usuario autenticado");
-                    
-                    //try
-                    //{
-                    //    var aux = _context.Usuario.Where(x => x.CorreoElectronico == usuario.CorreoElectronico).FirstOrDefault();
-                    //    return Ok(session.GetUsuario(aux.Idusuario));
-                    //}
-                    //catch (Exception)
-                    //{
-
-                    //    throw;
-                    //}
-                    
+                    var session = GetUsuarioSession(result.Idusuario);
+                    return Ok(session); 
             }
 
         }
+
+        //GET: api/Home/5
+        [HttpGet("{id}")]
+        public IActionResult GetUsuarioSession([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_id", id)
+            };
+            var roles = _context.SPSLTBRolxUsuario.FromSql("EXEC dbo.SPSLTBRolxUsuario @_id", parameters).ToList();
+            var rolesLista = new List<RolesUsuarioDetalle>();
+            foreach (var Rol in roles)
+            {
+                SqlParameter[] par = new SqlParameter[] { new SqlParameter("@_idRol", Rol.IdRol) };
+                var per = _context.SPSLTBPermisoxRol.FromSql("EXEC dbo.SPSLTBPermisoxRol @_idRol", par).ToList();
+                var aux = new RolesUsuarioDetalle(Rol.IdRol, Rol.NombreRol, per);
+                rolesLista.Add(aux);
+            }
+            var usuario = _context.Usuario.FromSql("EXEC dbo.SPSLTBUsuarioId @_id", parameters).FirstOrDefault();
+
+            if (usuario == null)
+            {
+                return NotFound($"La persona con el identificador {id} no se encuentra en la base de datos.");
+            }
+            else
+            {
+                UsuarioDetalle usuarioDetalle = new UsuarioDetalle(usuario, rolesLista);
+                return Ok(usuarioDetalle);
+            }
+        }
+
+
     }
 }
