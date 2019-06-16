@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using gestioncomprasAPI.Models;
 using System.Data.SqlClient;
 using gestioncomprasAPI.Models.Model.BasicType;
+using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RolsController : ControllerBase
@@ -51,10 +53,11 @@ namespace gestioncomprasAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult PutRol([FromRoute] int id, [FromBody] RolDetalleBasic rol)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_idRol", id),
                 new SqlParameter("@_nombreRol", rol.NombreRol),
-                new SqlParameter("@_session", rol.UsuarioSession)
+                new SqlParameter("@_session", idUsuario)
             };
 
             var query = _context.SPUPTBRol.FromSql("EXEC dbo.SPUPTBRol @_idRol, @_nombreRol, @_session", parameters).FirstOrDefault();
@@ -84,9 +87,10 @@ namespace gestioncomprasAPI.Controllers
         [HttpPost]
         public IActionResult PostRol([FromBody] RolDetalleBasic rol)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_nombreRol", rol.NombreRol),
-                new SqlParameter("@_session", rol.UsuarioSession)
+                new SqlParameter("@_session", idUsuario)
             };
 
             var query = _context.SPUPTBRol.FromSql("EXEC dbo.SPINTBRol @_nombreRol, @_session", parameters).FirstOrDefault();

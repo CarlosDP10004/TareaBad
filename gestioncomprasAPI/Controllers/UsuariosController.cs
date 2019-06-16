@@ -10,9 +10,12 @@ using System.Data.SqlClient;
 using gestioncomprasAPI.Models.Model.ComplexType;
 using gestioncomprasAPI.Models.Model.StoredProcedures;
 using gestioncomprasAPI.Models.Model.BasicType;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -25,6 +28,7 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // GET: api/Usuarios
+        [EnableCors]
         [HttpGet]
         public IActionResult GetUsuario()
         {
@@ -34,6 +38,7 @@ namespace gestioncomprasAPI.Controllers
         }
 
         //GET: api/Usuarios/5
+        [EnableCors]
         [HttpGet("{id}")]
         public IActionResult GetUsuario([FromRoute] int id)
         {
@@ -66,12 +71,13 @@ namespace gestioncomprasAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult PutUsuario([FromRoute] int id, [FromBody] UsuarioDetalleBasic usuario)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_id", id),
                 new SqlParameter("@_correoElectronico", usuario.CorreoElectronico),
                 new SqlParameter("@_clave", usuario.Clave),
                 new SqlParameter("@_idPersona", usuario.IdPersona),
-                new SqlParameter("@_session", usuario.UsuarioSession)
+                new SqlParameter("@_session", idUsuario)
             };
 
             var query = _context.SPUPTBUsuario.FromSql("EXEC dbo.SPUPTBUsuario @_id, @_correoElectronico, @_clave, @_idPersona, @_session ", parameters).FirstOrDefault();
@@ -107,12 +113,12 @@ namespace gestioncomprasAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_correoElectronico", usuario.CorreoElectronico),
                 new SqlParameter("@_clave", usuario.Clave),
                 new SqlParameter("@_idPersona", usuario.IdPersona),
-                new SqlParameter("@_session", usuario.UsuarioSession)
+                new SqlParameter("@_session", idUsuario)
             };
 
             var resultado =_context.SPINTBUsuario.FromSql("EXEC dbo.SPINTBUsuario @_correoElectronico, @_clave, @_idPersona, @_session", parameters).FirstOrDefault();
@@ -124,11 +130,12 @@ namespace gestioncomprasAPI.Controllers
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
-        public IActionResult DeleteUsuario([FromRoute] int id, [FromBody] UsuarioDetalleBasic usuario)
+        public IActionResult DeleteUsuario([FromRoute] int id)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_id", id),
-                new SqlParameter("@_session", usuario.UsuarioSession)
+                new SqlParameter("@_session", idUsuario)
             };
             var result = _context.SPUPTBUsuarioInactivar.FromSql("EXEC dbo.SPUPTBUsuarioInactivar @_id, @_session", parameters).FirstOrDefault();
             try

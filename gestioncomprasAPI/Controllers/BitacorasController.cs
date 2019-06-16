@@ -7,9 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using gestioncomprasAPI.Models;
 using System.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
+using System.Threading;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace gestioncomprasAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class BitacorasController : ControllerBase
@@ -25,10 +30,12 @@ namespace gestioncomprasAPI.Controllers
         [HttpGet]
         public IActionResult GetBitacora()
         {
+
+            int idUsuario = HttpContext.GetUserClaim();
+
             SqlParameter[] parameters = new SqlParameter[] { };
             var bitacora = _context.SPSLTBBitacora.FromSql("EXEC dbo.SPSLTBBitacora", parameters).ToList();
             return Ok(bitacora);
         }
-
     }
 }

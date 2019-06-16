@@ -9,9 +9,11 @@ using gestioncomprasAPI.Models;
 using System.Data.SqlClient;
 using gestioncomprasAPI.Models.Model.ComplexType.EmpresaProveedoraCollection;
 using gestioncomprasAPI.Models.Model.BasicType;
+using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EmpresaProveedorasController : ControllerBase

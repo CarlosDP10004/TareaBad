@@ -10,9 +10,11 @@ using System.Data.SqlClient;
 using gestioncomprasAPI.Models.Model;
 using gestioncomprasAPI.Models.Model.BasicType;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PersonasController : ControllerBase
@@ -64,7 +66,7 @@ namespace gestioncomprasAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[]
                {
                    new SqlParameter("@_id", id),
@@ -74,7 +76,7 @@ namespace gestioncomprasAPI.Controllers
                    new SqlParameter("@_nit", persona.Nit),
                    new SqlParameter("@_isss", persona.Isss),
                    new SqlParameter("@_fotoPerfil", persona.FotoPerfil),
-                   new SqlParameter("@_session", persona.UsuarioSession),
+                   new SqlParameter("@_session", idUsuario),
                    new SqlParameter("@_telefonoFijo", persona.TelefonoFijo),
                    new SqlParameter("@_telefonoMovil", persona.TelefonoMovil),
                    new SqlParameter("@_correoElectronico", persona.CorreoElectronico)                   
@@ -101,6 +103,7 @@ namespace gestioncomprasAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[]
                {
                    new SqlParameter("@_nombre", persona.NombrePersona),
@@ -109,7 +112,7 @@ namespace gestioncomprasAPI.Controllers
                    new SqlParameter("@_nit", persona.Nit),
                    new SqlParameter("@_isss", persona.Isss),
                    new SqlParameter("@_fotoPerfil", persona.FotoPerfil),
-                   new SqlParameter("@_session", persona.UsuarioSession),
+                   new SqlParameter("@_session", idUsuario),
                    new SqlParameter("@_telefonoFijo", persona.TelefonoFijo),
                    new SqlParameter("@_telefonoMovil", persona.TelefonoMovil),
                    new SqlParameter("@_correoElectronico", persona.CorreoElectronico)                   

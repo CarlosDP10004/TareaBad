@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using gestioncomprasAPI.Models;
 using System.Data.SqlClient;
 using gestioncomprasAPI.Models.Model.BasicType;
+using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductoesController : ControllerBase
@@ -55,6 +57,7 @@ namespace gestioncomprasAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult PutProducto([FromRoute] int id, [FromBody] ProductoDetalleBasic producto)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_id", id),
                 new SqlParameter("@_idEmpresaProveedora", producto.IdEmpresaProveedora),
@@ -64,7 +67,7 @@ namespace gestioncomprasAPI.Controllers
                 new SqlParameter("@_anioFabrica", producto.AnioFabricacion),
                 new SqlParameter("@_capacidadBTU", producto.CapacidadBtu),
                 new SqlParameter("@_precioUnidad", producto.PrecioUnidad),
-                new SqlParameter("@_usuarioSession", producto.UsuarioSession)
+                new SqlParameter("@_usuarioSession", idUsuario)
             };
 
             var query = _context.SPUPTBProducto.FromSql("EXEC dbo.SPUPTBProducto @_id, @_idEmpresaProveedora, @_nombreProducto, @_marca, @_modelo, " +
@@ -97,6 +100,7 @@ namespace gestioncomprasAPI.Controllers
         [HttpPost]
         public IActionResult PostProducto([FromBody] ProductoDetalleBasic producto)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameter = new SqlParameter[] {
                 new SqlParameter("@_idEmpresaProveedora", producto.IdEmpresaProveedora),
                 new SqlParameter("@_nombreProducto", producto.NombreProducto),
@@ -105,7 +109,7 @@ namespace gestioncomprasAPI.Controllers
                 new SqlParameter("@_anioFabrica", producto.AnioFabricacion),
                 new SqlParameter("@_capacidadBTU", producto.CapacidadBtu), 
                 new SqlParameter("@_precioUnidad", producto.PrecioUnidad), 
-                new SqlParameter("@_usuarioSession", producto.UsuarioSession)
+                new SqlParameter("@_usuarioSession", idUsuario)
             };
 
             var query = _context.SPINTBProducto.FromSql("EXEC dbo.SPINTBProducto @_idEmpresaProveedora, @_nombreProducto, @_marca, @_modelo, " +
