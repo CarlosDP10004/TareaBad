@@ -13,8 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
-    [Authorize]
-    [Route("api/[controller]")]
+    [Authorize]    
     [ApiController]
     public class InstitucionGubernamentalsController : ControllerBase
     {
@@ -27,6 +26,7 @@ namespace gestioncomprasAPI.Controllers
 
         // GET: api/InstitucionGubernamentals
         [HttpGet]
+        [Route("api/InstitucionGubernamentals")]
         public IActionResult GetInstitucionGubernamental()
         {
             SqlParameter[] parameters = new SqlParameter[] { };
@@ -35,7 +35,8 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // GET: api/InstitucionGubernamentals/5
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/InstitucionGubernamentals/{id}")]
         public IActionResult GetInstitucionGubernamental([FromRoute] int id)
         {
             SqlParameter[] parameters = new SqlParameter[] {
@@ -56,7 +57,8 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // PUT: api/InstitucionGubernamentals/5
-        [HttpPut("{id}")]
+        [HttpPut]
+        [Route("api/InstitucionGubernamentals/{id}")]
         public IActionResult PutInstitucionGubernamental([FromRoute] int id, [FromBody] InstitucionDetalleBasic institucionGubernamental)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -91,8 +93,9 @@ namespace gestioncomprasAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/InstitucionGubernamentals
+        // POST: api/InstitucionGubernamentals        
         [HttpPost]
+        [Route("api/InstitucionGubernamentals")]
         public IActionResult PostInstitucionGubernamental([FromBody] InstitucionDetalleBasic institucionGubernamental)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -106,9 +109,9 @@ namespace gestioncomprasAPI.Controllers
                 new SqlParameter("@_correoElectronico", institucionGubernamental.CorreoElectronico),
                 new SqlParameter("@_paginaWeb", institucionGubernamental.PaginaWeb)
             };
-            ReturnBasic response = new ReturnBasic("Institución actualizada correctamente");
+            ReturnBasic response = new ReturnBasic("Institución agregada correctamente");
             var query =_context.SPINTBInstitucionGubernamental.FromSql("EXEC dbo.SPINTBInstitucionGubernamental @_nombreInstitucion, @_encargado, " +
-                "@_logotipo, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters).FirstOrDefault();
+                "@_logotipo, @_usuarioSession, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters).FirstOrDefault();
 
             try
             {
@@ -130,7 +133,13 @@ namespace gestioncomprasAPI.Controllers
 
         // GET: Obtiene la empresa del Usuario en Session
 
-        
+        [HttpGet("api/InstitucionGubernamentals/ObtenerUsuariosParaEncargado")]
+        public IActionResult GetUsuariosParaEncargado() {
+            SqlParameter[] parameters = new SqlParameter[] { };
+
+            var query = _context.SPSLUsuariosParaEncargadosIG.FromSql("EXEC dbo.SPSLUsuariosParaEncargadosIG", parameters).ToList();
+            return Ok(query);
+        }
 
         private bool InstitucionGubernamentalExists(int id)
         {

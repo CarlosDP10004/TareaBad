@@ -59,7 +59,7 @@ namespace gestioncomprasAPI.Controllers
 
             if (usuario == null)
             {
-                return NotFound($"La persona con el identificador {id} no se encuentra en la base de datos.");
+                return NotFound();
             }
             else
             {
@@ -83,14 +83,17 @@ namespace gestioncomprasAPI.Controllers
             };
 
             var query = _context.SPUPTBUsuario.FromSql("EXEC dbo.SPUPTBUsuario @_id, @_correoElectronico, @_clave, @_idPersona, @_session ", parameters).FirstOrDefault();
-
+            ReturnBasic response = new ReturnBasic("Se actualizó el usuario exitosamente");
             try
             {
                 _context.SaveChanges();
                 if (query.Id == 0)
-                    BadRequest("Ya existe un usuario con los mismos datos que desea actualizar");
+                {
+                    response.Mensaje = "Ya existe un usuario con los mismos datos que desea actualizar";
+                    BadRequest(response);
+                }
                 else
-                    Ok("El usuario fue actualizado correctamente");
+                    Ok(response);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -125,14 +128,26 @@ namespace gestioncomprasAPI.Controllers
             };
 
             var resultado =_context.SPINTBUsuario.FromSql("EXEC dbo.SPINTBUsuario @_correoElectronico, @_clave, @_idPersona, @_session", parameters).FirstOrDefault();
-            if (resultado.Id == 0)
-                return BadRequest("El usuario ya existe en la Base de Datos");
-            else
-                return Ok("Usuario ingresado con Éxito");
+            ReturnBasic response = new ReturnBasic("Se agrego el usuario exitosamente");
+            try
+            {
+                if (resultado == null)
+                {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+                }
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }            
+
         }
 
         // DELETE: api/Usuarios/5
-        [HttpDelete("{id}")]
+        [HttpPut("api/UsuariosActivarDesactivar/{id}")]
         public IActionResult DeleteUsuario([FromRoute] int id)
         {
             int idUsuario = HttpContext.GetUserClaim();

@@ -2,6 +2,7 @@
 using gestioncomprasAPI.Models.Model.StoredProcedures;
 using gestioncomprasAPI.Models.Model.StoredProcedures.Bitacora;
 using gestioncomprasAPI.Models.Model.StoredProcedures.Compra;
+using gestioncomprasAPI.Models.Model.StoredProcedures.Empleado;
 using gestioncomprasAPI.Models.Model.StoredProcedures.EmpresaProveedora;
 using gestioncomprasAPI.Models.Model.StoredProcedures.InstitucionGubernamental;
 using gestioncomprasAPI.Models.Model.StoredProcedures.Producto;
@@ -69,6 +70,12 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPUPTBAutorizacionEmpresaResult> SPUPTBAutorizacionEmpresa { get; set; }
         public virtual DbSet<SPSLTBEmpresaProveedoraAutorizadaResult> SPSLTBEmpresaProveedoraAutorizada { get; set; }
         public virtual DbSet<SPSLTBEmpleadoResult> SPSLTBEmpleado { get; set; }
+        public virtual DbSet<SPSLTBEmpleadosTodosResult> SPSLTBEmpleadoTodos { get; set; }
+        public virtual DbSet<SPINTBEmpleadoResult> SPINTBEmpleado { get; set; }
+        public virtual DbSet<SPSLTBListaPuestosResult> SPSLTBListaPuestos { get; set; }
+
+        public virtual DbSet<SPSLUsuariosNoEmpleadosResult> SPSLUsuariosNoEmpleados { get; set; }
+        public virtual DbSet<SPSLTBEmpresasEmpleadosResult> SPSLTBEmpresasEmpleados { get; set; }
 
         // Institución Gubernamental
         public virtual DbSet<SPSLTBInstitucionGubernamentalResult> SPSLTBInstitucionGubernamental { get; set; }
@@ -76,6 +83,7 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPINTBInstitucionGubernamentalResult> SPINTBInstitucionGubernamental { get; set; }
         public virtual DbSet<SPUPTBInstitucionGubernamentalResult> SPUPTBInstitucionGubernamental { get; set; }
         public virtual DbSet<SPSLTBContactoInstitucionIdResult> SPSLTBContactoInstitucionId { get; set; }
+        public virtual DbSet<SPSLUsuariosParaEncargadosIGResult> SPSLUsuariosParaEncargadosIG { get; set; }
 
         // Producto
         public virtual DbSet<SPINTBProductoResult> SPINTBProducto { get; set; }
