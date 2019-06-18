@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace gestioncomprasAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class ProductoesController : ControllerBase
     {
@@ -26,6 +26,7 @@ namespace gestioncomprasAPI.Controllers
 
         // GET: api/Productoes
         [HttpGet]
+        [Route("api/Productoes")]
         public IActionResult GetProducto()
         {
             SqlParameter[] parameters = new SqlParameter[] {
@@ -36,7 +37,9 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // GET: api/Productoes/5
-        [HttpGet("{id}")]
+        //[HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/Productoes/{id}")]
         public IActionResult GetProducto([FromRoute] int id)
         {
             SqlParameter[] parameters = new SqlParameter[] {
@@ -54,7 +57,9 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // PUT: api/Productoes/5
-        [HttpPut("{id}")]
+        //[HttpPut("{id}")]
+        [HttpPut]
+        [Route("api/Productoes/{id}")]
         public IActionResult PutProducto([FromRoute] int id, [FromBody] ProductoDetalleBasic producto)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -98,6 +103,7 @@ namespace gestioncomprasAPI.Controllers
 
         // POST: api/Productoes
         [HttpPost]
+        [Route("api/Productoes")]
         public IActionResult PostProducto([FromBody] ProductoDetalleBasic producto)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -128,6 +134,19 @@ namespace gestioncomprasAPI.Controllers
                 throw;
             }            
         }
+
+        //GET: Se obtienen los productos por empresa seleccionada
+        [HttpGet("api/Productoes/ProductosPorEmpresa/{id}")]
+        public IActionResult GetProductosxEmpresa([FromRoute] int id) {
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_idEmpresa", id)
+            };
+
+            var query = _context.SPSLTBProductoPorEmpresa.FromSql("", parameters).ToList();
+
+            return Ok(query);
+        }
+
 
         private bool ProductoExists(int id)
         {

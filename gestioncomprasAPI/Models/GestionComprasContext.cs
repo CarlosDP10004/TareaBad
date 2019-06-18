@@ -1,6 +1,7 @@
 ﻿using System;
 using gestioncomprasAPI.Models.Model.StoredProcedures;
 using gestioncomprasAPI.Models.Model.StoredProcedures.Bitacora;
+using gestioncomprasAPI.Models.Model.StoredProcedures.Compra;
 using gestioncomprasAPI.Models.Model.StoredProcedures.EmpresaProveedora;
 using gestioncomprasAPI.Models.Model.StoredProcedures.InstitucionGubernamental;
 using gestioncomprasAPI.Models.Model.StoredProcedures.Producto;
@@ -55,6 +56,8 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPSLTBBitacoraResult> SPSLTBBitacora { get; set; }
         public virtual DbSet<SPUPTBUsuarioResult> SPUPTBUsuario { get; set; }
         public virtual DbSet<SPUPTBRolResult> SPUPTBRol { get; set; }
+        public virtual DbSet<SPTBRolPermisoResult> SPTBRolPermiso { get; set; }
+        public virtual DbSet<SPTBUsuarioRolResult> SPTBUsuarioRol { get; set; }
 
 
         // Empresa Proveedora
@@ -64,6 +67,8 @@ namespace gestioncomprasAPI.Models
         public virtual DbSet<SPSLTBContactoEmpresaIdResult> SPSLTBContactoEmpresaId { get; set; }
         public virtual DbSet<SPUPTBEmpresaProveedoraResult> SPUPTBEmpresaProveedora { get; set; }
         public virtual DbSet<SPUPTBAutorizacionEmpresaResult> SPUPTBAutorizacionEmpresa { get; set; }
+        public virtual DbSet<SPSLTBEmpresaProveedoraAutorizadaResult> SPSLTBEmpresaProveedoraAutorizada { get; set; }
+        public virtual DbSet<SPSLTBEmpleadoResult> SPSLTBEmpleado { get; set; }
 
         // Institución Gubernamental
         public virtual DbSet<SPSLTBInstitucionGubernamentalResult> SPSLTBInstitucionGubernamental { get; set; }
@@ -75,6 +80,16 @@ namespace gestioncomprasAPI.Models
         // Producto
         public virtual DbSet<SPINTBProductoResult> SPINTBProducto { get; set; }
         public virtual DbSet<SPUPTBProductoResult> SPUPTBProducto { get; set; }
+        public virtual DbSet<SPSLTBProductoPorEmpresaResult> SPSLTBProductoPorEmpresa { get; set; }
+
+        // Compra
+        public virtual DbSet<SPINTBCompraResult> SPINTBCompra { get; set; }
+        public virtual DbSet<SPUPTBCompraResult> SPUPTBCompra { get; set; }
+        public virtual DbSet<SPSLTBCompraResult> SPSLTBCompra { get; set; }
+        public virtual DbSet<SPUPTBInstalacionResult> SPUPTBInstalacion { get; set; }
+        public virtual DbSet<SPUPTBMantenimientoResult> SPUPTBMantenimiento { get; set; }
+        public virtual DbSet<SPSLTBCompraIdResult> SPSLTBCompraId { get; set; }
+
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

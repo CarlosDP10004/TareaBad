@@ -7,7 +7,6 @@ namespace gestioncomprasAPI.Models.Model.BasicType
 {
     public class EmpresaDetalleBasic
     {
-        public int IdEmpresaProveedora { get; set; }
         public string EmpresaProveedora { get; set; }
         public string DireccionEmpresa { get; set; }
         public int Responsable { get; set; }

@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace gestioncomprasAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
     [ApiController]
     public class RolsController : ControllerBase
     {
@@ -26,6 +25,7 @@ namespace gestioncomprasAPI.Controllers
 
         // GET: api/Rols
         [HttpGet]
+        [Route("api/Rols")]
         public IActionResult GetRol()
         {
             SqlParameter[] parameters = new SqlParameter[]{
@@ -37,7 +37,8 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // GET: api/Rols/5
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/Rols/{id}")]
         public IActionResult GetRol([FromRoute] int id)
         {
             SqlParameter[] parameters = new SqlParameter[]{
@@ -50,7 +51,8 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // PUT: api/Rols/5
-        [HttpPut("{id}")]
+        [HttpPut]
+        [Route("api/Rols/{id}")]
         public IActionResult PutRol([FromRoute] int id, [FromBody] RolDetalleBasic rol)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -61,12 +63,12 @@ namespace gestioncomprasAPI.Controllers
             };
 
             var query = _context.SPUPTBRol.FromSql("EXEC dbo.SPUPTBRol @_idRol, @_nombreRol, @_session", parameters).FirstOrDefault();
-
+            ReturnBasic basic = new ReturnBasic("El rol fue actualizado exitosamente.");
             try
             {
                 _context.SaveChanges();
                 if (query.Id == 1)
-                    Ok("El rol fue actualizado exitosamente.");
+                    Ok(basic);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -85,6 +87,7 @@ namespace gestioncomprasAPI.Controllers
 
         // POST: api/Rols
         [HttpPost]
+        [Route("api/Rols")]
         public IActionResult PostRol([FromBody] RolDetalleBasic rol)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -104,7 +107,7 @@ namespace gestioncomprasAPI.Controllers
             {
 
                 throw;
-            }           
+            }
 
             return NoContent();
         }
@@ -112,12 +115,67 @@ namespace gestioncomprasAPI.Controllers
 
         //GET: Permisos
         [HttpGet]
-        [Route("Permisos")]
+        [Route("api/Rols/Permisos")]
         public IActionResult GetPermiso() {
-            SqlParameter[] parameters = new SqlParameter[] {  };
+            SqlParameter[] parameters = new SqlParameter[] { };
             var result = _context.Permiso.FromSql("EXEC dbo.ObtenerTodosLosPermisos", parameters).ToList();
             return Ok(result);
         }
+
+        [HttpPost("api/Rols/AgregarPermisos/{id}")]
+        public IActionResult AgregarPermisosRol([FromRoute] int id, [FromBody] PermisoDetalleBasic permiso) {
+            SqlParameter[] sqls = new SqlParameter[] {
+                new SqlParameter("@_idRol", id),
+                new SqlParameter("@_idPermiso", permiso.IdPermiso)
+            };
+
+            var query = _context.SPTBRolPermiso.FromSql("EXEC dbo.SPINTBRolPermiso @_idRol, @_idPermiso", sqls).FirstOrDefault();
+            ReturnBasic response = new ReturnBasic("Se actualizaron los permisos del Rol");
+            try
+            {
+                if (query == null)
+                {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+                }
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpPut("api/Rols/QuitarPermisos/{id}")]
+
+        public IActionResult QuitarPermisosRol([FromRoute] int id, [FromBody] PermisoDetalleBasic permiso)
+        {
+            SqlParameter[] sqls = new SqlParameter[] {
+                new SqlParameter("@_idRol", id),
+                new SqlParameter("@_idPermiso", permiso.IdPermiso)
+            };
+
+            var query = _context.SPTBRolPermiso.FromSql("EXEC dbo.SPDLTBRolPermiso @_idRol, @_idPermiso", sqls).FirstOrDefault();
+            ReturnBasic response = new ReturnBasic("Se actualizaron los permisos del Rol");
+            try
+            {
+                if (query == null)
+                {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+                }
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
 
 
         private bool RolExists(int id)

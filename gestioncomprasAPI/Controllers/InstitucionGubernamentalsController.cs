@@ -41,13 +41,13 @@ namespace gestioncomprasAPI.Controllers
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_id", id)
             };
-
+            ReturnBasic returnBasic = new ReturnBasic("Elemento no encontrado");
             var _instgob = _context.InstitucionGubernamental.FromSql("EXEC dbo.SPSLTBInstitucionGubernamentalId @_id", parameters).FirstOrDefault();
             var _contactos = _context.SPSLTBContactoInstitucionId.FromSql("EXEC dbo.SPSLTBContactoInstitucionId @_id", parameters).ToList();
 
             if (_instgob == null)
             {
-                return NotFound("Elemento no encontrado");
+                return NotFound(returnBasic);
             }
             else {
                 InstitucionDetalle _institucion = new InstitucionDetalle(_instgob, _contactos);
@@ -57,34 +57,35 @@ namespace gestioncomprasAPI.Controllers
 
         // PUT: api/InstitucionGubernamentals/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutInstitucionGubernamental([FromRoute] int id, [FromBody] InstitucionGubernamental institucionGubernamental)
+        public IActionResult PutInstitucionGubernamental([FromRoute] int id, [FromBody] InstitucionDetalleBasic institucionGubernamental)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != institucionGubernamental.IdInstitucionG)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(institucionGubernamental).State = EntityState.Modified;
-
+            int idUsuario = HttpContext.GetUserClaim();
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_id", id),
+                new SqlParameter("@_nombreInst", institucionGubernamental.NombreInstitucionG),
+                new SqlParameter("@_encargadoInst", institucionGubernamental.EncargadoUACI),
+                new SqlParameter("@_logotipoInst", institucionGubernamental.LogotipoInstitucionG),
+                new SqlParameter("@_usuarioSession", idUsuario), 
+                new SqlParameter("@_telefonoCommutador", institucionGubernamental.TelefonoConmutador),
+                new SqlParameter("@_telefonoPBX", institucionGubernamental.TelefonoPBX),
+                new SqlParameter("@_correoElectronico", institucionGubernamental.CorreoElectronico),
+                new SqlParameter("@_paginaWeb", institucionGubernamental.PaginaWeb)
+            };
+            ReturnBasic response = new ReturnBasic("Institución actualizada correctamente");
+            var query = _context.SPINTBInstitucionGubernamental.FromSql("EXEC dbo.SPUPTBInstitucionGubernamental @_id, @_nombreInst, @_encargadoInst, @_logotipoInst, " +
+                "@_usuarioSession, @_telefonoCommutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters).FirstOrDefault();
             try
-            {
-                await _context.SaveChangesAsync();
+            {                
+                _context.SaveChanges();
+                if (query.Id == 1)
+                {
+                    return Ok(response);
+                }
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
-                if (!InstitucionGubernamentalExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                response.Mensaje = "La petición no fue procesada correctamente";
+                return BadRequest(response);
             }
 
             return NoContent();
@@ -94,42 +95,42 @@ namespace gestioncomprasAPI.Controllers
         [HttpPost]
         public IActionResult PostInstitucionGubernamental([FromBody] InstitucionDetalleBasic institucionGubernamental)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_nombreInstitucion", institucionGubernamental.NombreInstitucionG),
                 new SqlParameter("@_encargado", institucionGubernamental.EncargadoUACI),
                 new SqlParameter("@_logotipo", institucionGubernamental.LogotipoInstitucionG),
+                new SqlParameter("@_usuarioSession", idUsuario),
                 new SqlParameter("@_telefonoConmutador", institucionGubernamental.TelefonoConmutador),
                 new SqlParameter("@_telefonoPBX", institucionGubernamental.TelefonoPBX),
                 new SqlParameter("@_correoElectronico", institucionGubernamental.CorreoElectronico),
                 new SqlParameter("@_paginaWeb", institucionGubernamental.PaginaWeb)
             };
+            ReturnBasic response = new ReturnBasic("Institución actualizada correctamente");
+            var query =_context.SPINTBInstitucionGubernamental.FromSql("EXEC dbo.SPINTBInstitucionGubernamental @_nombreInstitucion, @_encargado, " +
+                "@_logotipo, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters).FirstOrDefault();
 
-            _context.SPINTBInstitucionGubernamental.FromSql("EXEC dbo.SPINTBInstitucionGubernamental @_nombreInstitucion, @_encargado, " +
-                "@_logotipo, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters);
-
-            return Ok();
-        }
-
-        // DELETE: api/InstitucionGubernamentals/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteInstitucionGubernamental([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                _context.SaveChanges();
+                if (query.Id == 1)
+                {
+                    return Ok(response);
+                }
+            }
+            catch (Exception)
+            {
+
+                response.Mensaje = "La petición no fue procesada correctamente";
+                return BadRequest(response);
             }
 
-            var institucionGubernamental = await _context.InstitucionGubernamental.FindAsync(id);
-            if (institucionGubernamental == null)
-            {
-                return NotFound();
-            }
-
-            _context.InstitucionGubernamental.Remove(institucionGubernamental);
-            await _context.SaveChangesAsync();
-
-            return Ok(institucionGubernamental);
+            return NoContent();
         }
+
+        // GET: Obtiene la empresa del Usuario en Session
+
+        
 
         private bool InstitucionGubernamentalExists(int id)
         {

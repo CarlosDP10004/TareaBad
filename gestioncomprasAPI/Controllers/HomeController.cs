@@ -10,11 +10,13 @@ using gestioncomprasAPI.Models;
 using gestioncomprasAPI.Models.Model.BasicType;
 using gestioncomprasAPI.Models.Model.ComplexType;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace gestioncomprasAPI.Controllers
 {
@@ -37,6 +39,7 @@ namespace gestioncomprasAPI.Controllers
         }
 
         [AllowAnonymous]
+        //[EnableCors]
         [HttpPost]
         public IActionResult Login([FromBody]Usuario login)
         {
@@ -85,30 +88,32 @@ namespace gestioncomprasAPI.Controllers
         //}
 
 
-        private (string, Usuario) AuthenticateUser(Usuario usuario)
+        private (ReturnBasic, Usuario) AuthenticateUser(Usuario usuario)
         {
             SqlParameter[] parameters = new SqlParameter[] {
                 new SqlParameter("@_correoElectronico", usuario.CorreoElectronico),
                 new SqlParameter("@_clave", usuario.Clave)
             };
-
+            ReturnBasic aux = new ReturnBasic("Usuario Válido");
             var result = _context.SPSLTBUsuarioAutenticar.FromSql("EXEC dbo.SPSLTBUsuarioAutenticar @_correoElectronico, @_clave", parameters).FirstOrDefault();
             switch (result.Id)
             {
                 case 0:
-                    return ("El usuario no se encuentra registrado en la BD", null);
+                    aux.Mensaje = "El usuario no se encuentra registrado en la BD";                    
+                    return (aux, null);
                 case 1:
-                    return ("Su contraseña es incorrecta", null);
+                    aux.Mensaje = "Su contraseña es incorrecta";
+                    return (aux, null);
                 case 2:
                 case 3:
-                    return ("Su usuario ha sido bloqueado, comuniquese con HelpDesk", null);
+                    aux.Mensaje = "Su usuario ha sido bloqueado, comuniquese con HelpDesk";
+                    return (aux, null);
                 default:
                     var usuarioEncontrado = new Usuario() {
                         CorreoElectronico = usuario.CorreoElectronico,
                         Idusuario = result.Idusuario
                     };
-
-                    return ("Usuario valido", usuarioEncontrado);
+                    return (aux, usuarioEncontrado);
             }
         }
 

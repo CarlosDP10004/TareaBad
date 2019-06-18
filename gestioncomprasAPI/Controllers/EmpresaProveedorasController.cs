@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace gestioncomprasAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    //[EnableCors("*", "*", "*")]    
     [ApiController]
     public class EmpresaProveedorasController : ControllerBase
     {
@@ -27,6 +27,7 @@ namespace gestioncomprasAPI.Controllers
 
         // GET: api/EmpresaProveedoras
         [HttpGet]
+        [Route("api/EmpresaProveedoras")]
         public IActionResult GetEmpresaProveedora()
         {
             SqlParameter[] parameters = new SqlParameter[] { };
@@ -35,7 +36,9 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // GET: api/EmpresaProveedoras/5
-        [HttpGet("{id}")]
+        //[HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/EmpresaProveedoras/{id}")]
         public IActionResult GetEmpresaProveedora([FromRoute] int id)
         {
             SqlParameter[] parameters = new SqlParameter[]
@@ -53,11 +56,65 @@ namespace gestioncomprasAPI.Controllers
                 return Ok(empresa);
             }           
         }
+        //SPSLTBEmpresaProveedoraAutorizadaVender
+        [HttpGet]
+        [Route("api/EmpresaProveedoras/AutorizadasVender")]
+        public IActionResult GetEmpresaProveedoraVenta()
+        {
+            SqlParameter[] parameters = new SqlParameter[] { };
+            var query = _context.SPSLTBEmpresaProveedoraAutorizada.FromSql("EXEC dbo.SPSLTBEmpresaProveedoraAutorizadaVender", parameters).ToList();
+            return Ok(query);
+        }
+
+        // GET: Empresas Autorizadas para Instalar        
+        [HttpGet]
+        [Route("api/EmpresaProveedoras/AutorizadasInstalar")]
+        public IActionResult GetEmpresaProveedoraInstalacion()
+        {
+            SqlParameter[] parameters = new SqlParameter[] { };
+            var query = _context.SPSLTBEmpresaProveedoraAutorizada.FromSql("EXEC dbo.SPSLTBEmpresaProveedoraAutorizadaInstalar", parameters).ToList();
+            return Ok(query);
+        }
+
+        // GET: Empresas Autorizadas para Instalar        
+        [HttpGet]
+        [Route("api/EmpresaProveedoras/AutorizadasMantenimiento")]
+        public IActionResult GetEmpresaProveedoraMantenimiento()
+        {
+            SqlParameter[] parameters = new SqlParameter[] { };
+            var query = _context.SPSLTBEmpresaProveedoraAutorizada.FromSql("EXEC dbo.SPSLTBEmpresaProveedoraAutorizadaMantenimiento", parameters).ToList();
+            return Ok(query);
+        }
+
+        // GET: Empleados por Empresa para Instalar        
+        [HttpGet("api/EmpresaProveedoras/EmpleadosInstalacion/{id}")]
+        public IActionResult GetEmpleadosInstalacionxEmpresa([FromRoute] int id)
+        {
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_idEmpresa", id)
+            };
+            var query = _context.SPSLTBEmpleado.FromSql("EXEC dbo.SPSLTBEmpleadoInstalacion @_idEmpresa", parameters).ToList();
+            return Ok(query);
+        }
+
+        //// GET: Empleados por Empresa para Mantenimiento   
+        [HttpGet("api/EmpresaProveedoras/EmpleadosMantenimiento/{id}")]
+        public IActionResult GetEmpleadosMantenimientoxEmpresa([FromRoute] int id)
+        {
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_idEmpresa", id)
+            };
+            var query = _context.SPSLTBEmpleado.FromSql("EXEC dbo.SPSLTBEmpleadoMantenimiento @_idEmpresa", parameters).ToList();
+            return Ok(query);
+        }
 
         // PUT: api/EmpresaProveedoras/5
-        [HttpPut("{id}")]
+        //[HttpPut("{id}")]
+        [HttpPut]
+        [Route("api/EmpresaProveedoras/{id}")]
         public IActionResult PutEmpresaProveedora([FromRoute] int id, [FromBody] EmpresaDetalleBasic empresaProveedora)
-        {            
+        {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[]
                {
                    new SqlParameter("@_id", id),
@@ -67,21 +124,40 @@ namespace gestioncomprasAPI.Controllers
                    new SqlParameter("@_nitEmpresa", empresaProveedora.NitEmpresa),
                    new SqlParameter("@_logotipoEmpresa", empresaProveedora.LogotipoEmpresa),
                    new SqlParameter("@_montoPermitido", empresaProveedora.MontoPermitido),
+                   new SqlParameter("@_usuarioSession", idUsuario),
                    new SqlParameter("@_telefonoConmutador", empresaProveedora.TelefonoConmutador),
                    new SqlParameter("@_telefonoPBX", empresaProveedora.TelefonoPBX),
                    new SqlParameter("@_correoElectronico", empresaProveedora.CorreoElectronico),
                    new SqlParameter("@_paginaWeb", empresaProveedora.PaginaWeb),
                };
-            _context.SPUPTBEmpresaProveedora.FromSql("EXEC dbo.SPUPTBEmpresaProveedora @_id, @_empresaProveedora, @_direccionEmpresa, @_responsable, @_nitEmpresa, " +
-                "@_logotipoEmpresa, @_montoPermitido, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters);
+           var query = _context.SPUPTBEmpresaProveedora.FromSql("EXEC dbo.SPUPTBEmpresaProveedora @_id, @_empresaProveedora, @_direccionEmpresa, @_responsable, @_nitEmpresa, " +
+                "@_logotipoEmpresa, @_montoPermitido, @_usuarioSession, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters).FirstOrDefault();
 
-            return NoContent();
+            ReturnBasic response = new ReturnBasic("La empresa ha sido actualizada exitosamente");
+
+            try
+            {
+                if (query == null)
+                {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+
+                }                    
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
         
         // POST: api/EmpresaProveedoras
         [HttpPost]
+        [Route("api/EmpresaProveedoras")]
         public IActionResult PostEmpresaProveedora([FromBody] EmpresaDetalleBasic empresaProveedora)
         {
+            int idUsuario = HttpContext.GetUserClaim();
             SqlParameter[] parameters = new SqlParameter[]
                {
                    new SqlParameter("@_empresaProveedora", empresaProveedora.EmpresaProveedora),
@@ -90,36 +166,60 @@ namespace gestioncomprasAPI.Controllers
                    new SqlParameter("@_nitEmpresa", empresaProveedora.NitEmpresa),
                    new SqlParameter("@_logotipoEmpresa", empresaProveedora.LogotipoEmpresa),
                    new SqlParameter("@_montoPermitido", empresaProveedora.MontoPermitido),
+                   new SqlParameter("@_usuarioSession", idUsuario),
                    new SqlParameter("@_telefonoConmutador", empresaProveedora.TelefonoConmutador),
                    new SqlParameter("@_telefonoPBX", empresaProveedora.TelefonoPBX),
                    new SqlParameter("@_correoElectronico", empresaProveedora.CorreoElectronico),
                    new SqlParameter("@_paginaWeb", empresaProveedora.PaginaWeb),
                };
-            _context.SPINTBEmpresaProveedora.FromSql("EXEC dbo.SPINTBEmpresaProveedora @_empresaProveedora, @_direccionEmpresa, @_responsable, @_nitEmpresa, " +
-                "@_logotipoEmpresa, @_montoPermitido, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters);
-            
-            return Ok();
+            var query = _context.SPINTBEmpresaProveedora.FromSql("EXEC dbo.SPINTBEmpresaProveedora @_empresaProveedora, @_direccionEmpresa, @_responsable, @_nitEmpresa, " +
+                "@_logotipoEmpresa, @_montoPermitido, @_usuarioSession, @_telefonoConmutador, @_telefonoPBX, @_correoElectronico, @_paginaWeb", parameters).FirstOrDefault();
+            ReturnBasic response = new ReturnBasic("La empresa ha sido agregada exitosamente");
+
+            try
+            {
+                if (query == null) {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+                }
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+
+                return BadRequest();
+            }
         }
 
-        // DELETE: api/EmpresaProveedoras/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmpresaProveedora([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
+        [HttpPut("api/EmpresaProveedoras/ModAutorizacion/{id}")]
+        public IActionResult PutModificarAutorizacionEmpresa([FromRoute] int id, [FromBody] AutorizacionBasic autorizacion) {
+            int idUsuario = HttpContext.GetUserClaim();
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@_idEmpresaProveedora", id),
+                new SqlParameter("@_autoVenta", autorizacion.AutorizacionVenta),
+                new SqlParameter("@_autoInsta", autorizacion.AutorizacionInstalacion),
+                new SqlParameter("@_autoMante", autorizacion.AutorizacionMantenimiento),
+                new SqlParameter("@_usuarioSession", idUsuario)
+            };
+            ReturnBasic respuesta = new ReturnBasic("El registro fue actualizado correctamente");
+            var query = _context.SPUPTBAutorizacionEmpresa.FromSql("EXEC dbo.SPUPTBAutorizacion @_idEmpresaProveedora, " +
+                "@_autoVenta, @_autoInsta, @_autoMante, @_usuarioSession", parameters).FirstOrDefault();
+            try
             {
-                return BadRequest(ModelState);
+                _context.SaveChanges();
+                if (query.Id == 1) {
+                   return Ok(respuesta);
+                }
+                    
+            }
+            catch (Exception)
+            {
+                throw;
             }
 
-            var empresaProveedora = await _context.EmpresaProveedora.FindAsync(id);
-            if (empresaProveedora == null)
-            {
-                return NotFound();
-            }
+            return NotFound();
 
-            _context.EmpresaProveedora.Remove(empresaProveedora);
-            await _context.SaveChangesAsync();
-
-            return Ok(empresaProveedora);
         }
 
         private bool EmpresaProveedoraExists(int id)

@@ -38,32 +38,32 @@ namespace gestioncomprasAPI
                 options.AddPolicy(MyAllowSpecificOrigins,
                 builder =>
                 {
-                    builder.WithOrigins("http://example.com",
-                                        "http://www.contoso.com")
+                    builder.WithOrigins("http://localhost:3000",
+                                        "https://localhost:44364")
                                         .AllowAnyHeader()
                                         .AllowAnyMethod();
                 });
 
-                options.AddPolicy("AllowHeaders",
-                builder =>
-                {
-                    builder.WithOrigins("http://example.com")
-                           .WithHeaders(HeaderNames.ContentType, "x-custom-header");
-                });
+                //options.AddPolicy("AllowHeaders",
+                //builder =>
+                //{
+                //    builder.WithOrigins("http://example.com")
+                //           .WithHeaders(HeaderNames.ContentType, "x-custom-header");
+                //});
 
-                options.AddPolicy("ExposeResponseHeaders",
-                builder =>
-                {
-                    builder.WithOrigins("http://example.com")
-                           .WithExposedHeaders("x-custom-header");
-                });
+                //options.AddPolicy("ExposeResponseHeaders",
+                //builder =>
+                //{
+                //    builder.WithOrigins("http://example.com")
+                //           .WithExposedHeaders("x-custom-header");
+                //});
 
-                options.AddPolicy("AllowCredentials",
-                builder =>
-                {
-                    builder.WithOrigins("http://example.com")
-                           .AllowCredentials();
-                });
+                //options.AddPolicy("AllowCredentials",
+                //builder =>
+                //{
+                //    builder.WithOrigins("http://example.com")
+                //           .AllowCredentials();
+                //});
             });
             string conString = Configuration.GetConnectionString("GestionComprasDatabase");
             services.AddDbContext<GestionComprasContext>(opt => opt.UseSqlServer(conString));

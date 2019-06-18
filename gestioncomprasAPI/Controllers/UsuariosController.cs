@@ -15,8 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace gestioncomprasAPI.Controllers
 {
-    [Authorize]
-    [Route("api/[controller]")]
+    [Authorize]    
     [ApiController]
     public class UsuariosController : ControllerBase
     {
@@ -30,6 +29,7 @@ namespace gestioncomprasAPI.Controllers
         // GET: api/Usuarios
         [EnableCors]
         [HttpGet]
+        [Route("api/Usuarios")]
         public IActionResult GetUsuario()
         {
             SqlParameter[] parameters = new SqlParameter[] { };
@@ -39,7 +39,8 @@ namespace gestioncomprasAPI.Controllers
 
         //GET: api/Usuarios/5
         [EnableCors]
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/Usuarios/{id}")]
         public IActionResult GetUsuario([FromRoute] int id)
         {
             SqlParameter[] parameters = new SqlParameter[] {
@@ -68,7 +69,8 @@ namespace gestioncomprasAPI.Controllers
         }
 
         // PUT: api/Usuarios/5
-        [HttpPut("{id}")]
+        [HttpPut]
+        [Route("api/Usuarios/{id}")]
         public IActionResult PutUsuario([FromRoute] int id, [FromBody] UsuarioDetalleBasic usuario)
         {
             int idUsuario = HttpContext.GetUserClaim();
@@ -107,6 +109,7 @@ namespace gestioncomprasAPI.Controllers
 
         // POST: api/Usuarios
         [HttpPost]
+        [Route("api/Usuarios")]
         public IActionResult PostUsuario([FromBody] UsuarioDetalleBasic usuario)
         {
             if (!ModelState.IsValid)
@@ -152,20 +155,57 @@ namespace gestioncomprasAPI.Controllers
             
         }
 
-        //GET: Permisos
-        [HttpPost]
-        [Route("AgregarRoles")]
+        [HttpPost("api/Usuarios/AgregarRoles/{id}")]
+        public IActionResult AgregarRolesUsuario([FromRoute] int id, [FromBody] RolBasic rol) {
+            SqlParameter[] sqls = new SqlParameter[] {
+                new SqlParameter("@_idUsuario", id),
+                new SqlParameter("@_idRol", rol.IdRol)
+            };
 
-        public IActionResult PostRolesUsuario([FromRoute] int id, [FromBody] List<UsuarioRolDetalle> rol) {
-            foreach (var Ur in rol) {
-                var usuarioRol = new UsuarioRol();
-                
-                
+            var query = _context.SPTBUsuarioRol.FromSql("EXEC dbo.SPINTBUsuarioRol @_idUsuario, @_idRol", sqls).FirstOrDefault(); 
+            ReturnBasic response = new ReturnBasic("Se actualizaron los Roles del Usuario");
+            try
+            {
+                if (query == null)
+                {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+                }
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
             }
 
-            return Ok();
         }
 
+        [HttpPut("api/Usuarios/QuitarRoles/{id}")]
+
+        public IActionResult QuitarRolesUsuario([FromRoute] int id, [FromBody] RolBasic rol) {
+            SqlParameter[] sqls = new SqlParameter[] {
+                new SqlParameter("@_idUsuario", id),
+                new SqlParameter("@_idRol", rol.IdRol)
+            };
+            var query = _context.SPTBUsuarioRol.FromSql("EXEC dbo.SPDLTBUsuarioRol @_idUsuario, @_idRol", sqls).FirstOrDefault();
+            ReturnBasic response = new ReturnBasic("Se actualizaron los Roles del Usuario");
+            try
+            {
+                if (query == null)
+                {
+                    response.Mensaje = "La petición no fue procesada correctamente";
+                    return BadRequest(response);
+                }
+                _context.SaveChanges();
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+
+        }
 
         private bool UsuarioExists(int id)
         {
